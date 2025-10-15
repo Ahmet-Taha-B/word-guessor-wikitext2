@@ -5,7 +5,7 @@ from src.dataset import Tokenizer
 import os
 from huggingface_hub import hf_hub_download
 
-REPO_ID = "AhmetTaha07/next-word-predictor-wikitext"
+REPO_ID = "AhmetTaha07/next-word-predictor-wikitext2"
 
 @st.cache_resource
 def load_model():
