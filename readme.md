@@ -88,8 +88,8 @@ MIT License
 
 ## 👤 Author
 
-Your Name
+Ahmet Taha Berberoğlu
 
 ---
 
-Made with ❤️ using PyTorch Lightning & Streamlit
+Made with using PyTorch Lightning & Streamlit
