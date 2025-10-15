@@ -5,7 +5,7 @@ from src.dataset import Tokenizer
 import os
 from huggingface_hub import hf_hub_download
 
-REPO_ID = "AhmetTaha07/next-word-predictor-wikitext2"
+REPO_ID = "KULLANICIADIN/next-word-predictor-wikitext"
 
 @st.cache_resource
 def load_model():
@@ -189,4 +189,4 @@ st.sidebar.info(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("Made with using PyTorch Lightning & Streamlit")
+st.sidebar.markdown("Made with ❤️ using PyTorch Lightning & Streamlit")
