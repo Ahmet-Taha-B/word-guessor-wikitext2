@@ -2,55 +2,39 @@ import streamlit as st
 import torch
 from src.model import NextWordLSTM
 from src.dataset import Tokenizer
-import os
 from huggingface_hub import hf_hub_download
+import re
 
-REPO_ID = "KULLANICIADIN/next-word-predictor-wikitext"
+REPO_ID = "AhmetTaha07/next-word-predictor-wikitext2"
 
 @st.cache_resource
 def load_model():
-    os.makedirs('models/checkpoints', exist_ok=True)
-    
-    tokenizer_path = 'models/tokenizer.pkl'
-    model_path = 'models/checkpoints/best_model.ckpt'
-    
-    if not os.path.exists(tokenizer_path):
-        st.info("Downloading tokenizer from Hugging Face...")
+    try:
         tokenizer_path = hf_hub_download(
             repo_id=REPO_ID,
-            filename="tokenizer.pkl",
-            cache_dir="models"
+            filename="tokenizer.pkl"
         )
-        os.rename(tokenizer_path, 'models/tokenizer.pkl')
-        tokenizer_path = 'models/tokenizer.pkl'
-    
-    if not os.path.exists(model_path):
-        st.info("Downloading model from Hugging Face... (this may take a minute)")
-        downloaded_model = hf_hub_download(
+        
+        model_path = hf_hub_download(
             repo_id=REPO_ID,
-            filename="best_model.ckpt",
-            cache_dir="models"
+            filename="best_model.ckpt"
         )
-        os.rename(downloaded_model, model_path)
-    
-    tokenizer = Tokenizer()
-    tokenizer.load(tokenizer_path)
-    
-    model = NextWordLSTM.load_from_checkpoint(
-        model_path,
-        vocab_size=len(tokenizer.word2idx)
-    )
-    model.eval()
-    
-    return model, tokenizer
-
-def predict_next_word_filtered(model, text, tokenizer, top_k=5):
-    predictions = model.predict_next_word(text, tokenizer, top_k=top_k * 3)
-    filtered = [(word, prob) for word, prob in predictions if word != "<UNK>"]
-    return filtered[:top_k]
+        
+        tokenizer = Tokenizer()
+        tokenizer.load(tokenizer_path)
+        
+        model = NextWordLSTM.load_from_checkpoint(
+            model_path,
+            vocab_size=len(tokenizer.word2idx)
+        )
+        model.eval()
+        
+        return model, tokenizer
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        raise
 
 def fix_text_spacing(text):
-    import re
     text = re.sub(r'\s+([.,!?;:])', r'\1', text)
     text = re.sub(r'\s+(n\'t|\'re|\'ve|\'ll|\'d|\'m|\'s)', r'\1', text)
     text = re.sub(r'(\w)\s+\'(\w)', r"\1'\2", text)
@@ -58,6 +42,11 @@ def fix_text_spacing(text):
     text = re.sub(r'=\s*=\s*=', '', text)
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
+
+def predict_next_word_filtered(model, text, tokenizer, top_k=5):
+    predictions = model.predict_next_word(text, tokenizer, top_k=top_k * 3)
+    filtered = [(word, prob) for word, prob in predictions if word != "<UNK>"]
+    return filtered[:top_k]
 
 def generate_text_filtered(model, seed_text, tokenizer, max_length=50, temperature=1.0):
     model.eval()
